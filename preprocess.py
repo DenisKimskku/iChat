@@ -107,7 +107,7 @@ if not os.path.exists(PATH + "/index.faiss"):
     #print("Time taken: ", time.time()-ch_time)
 
     #quit()
-    
+
 #Intended to be testing#
 import google.generativeai as palm
 palm.configure(api_key=GOOGLE_API_KEY)
@@ -118,12 +118,16 @@ for model in models:
   print(model.name)
 
 
-from langchain.memory import ConversationBufferMemory
-memory = ConversationBufferMemory(memory_key="chat_history")#, return_docs = False)
+from langchain.memory import ConversationBufferMemory, VectorStoreRetrieverMemory
+
+#memory = ConversationBufferMemory(memory_key="chat_history")#, return_docs = False)
 #memory.chat_memory.add_user_message("Hello")
 epoch = 5
 #load the vectorstore
 for cnt in range(1, epoch+1):
+    vs_doc = FAISS.load_local(PATH, embeddings, allow_dangerous_deserialization = True)
+    retriever = vs_doc.as_retriever(search_kwargs=dict(k=1))
+    memory = VectorStoreRetrieverMemory(retriever=retriever, memory_key="chat_history")
     template2 = """You are a nice chatbot having a conversation with a human.
     Previous conversation:
     {chat_history}
@@ -133,10 +137,10 @@ for cnt in range(1, epoch+1):
     print(f"Epoch {cnt}")
     query = input("Enter your query: ")
     query = query.strip()
-    vs_doc = FAISS.load_local(PATH, embeddings, allow_dangerous_deserialization = True)
+    
     tim1 = time.time()
     print(f"Time taken: {time.time()-tim1:.2f}s")
-    retriever = vs_doc.as_retriever(search_type="mmr")
+    
     llm = ChatGooglePalm(google_api_key=GOOGLE_API_KEY)
     chat_history_tuples = []
     for message in memory:

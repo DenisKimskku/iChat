@@ -34,6 +34,7 @@ def response(message, history, additional_input_info):
 
     return response_text
 
+
 # Gradio interface setup
 gr.ChatInterface(
     fn=response,
@@ -41,7 +42,7 @@ gr.ChatInterface(
     chatbot=gr.Chatbot(height=1000),
     title="What chatbot do you want?",
     description="Ask and I shall respond.",
-    theme="soft",
+    theme="Monochrome", #"soft"
     examples=[["It's hot today :( "], ["Lunch menu suggestions, choose between noodles or rice"], ["Tell me about A15 bionic chipset."]],
     retry_btn="Retry ↩",
     undo_btn="Delete Last Chat ❌",
