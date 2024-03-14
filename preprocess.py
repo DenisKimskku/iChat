@@ -1,161 +1,125 @@
-import torch
-
-#use wikitext-2 dataset from torchtext, which is a popular dataset for language modeling. Load dataset
-import torchtext
-from torchtext import data
-from torchtext import datasets
-from torchtext import vocab
-from langchain import LLMChain
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.chat_models import ChatGooglePalm
-from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
-from langchain.document_loaders import TextLoader
-from langchain.prompts import PromptTemplate
-import warnings
-import time
-import random
-start_time = time.time()
-warnings.simplefilter(action='ignore')
-
-PATH = "/Users/deniskim/Library/CloudStorage/SynologyDrive-M1/문서/연구/DIAL/code/home/tako/minseok/db_faiss"
-PATH_DATA = "/Users/deniskim/Library/CloudStorage/SynologyDrive-M1/문서/연구/DIAL/code/home/tako/minseok/dataset/"
-#GOOGLE_API_KEY is on PATH_DATA+"google_api.txt". Read from there
-with open(PATH_DATA+"google_api.txt", "r") as f:
-    GOOGLE_API_KEY = f.read()
-GOOGLE_API_KEY = GOOGLE_API_KEY.strip()
-embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", google_api_key=GOOGLE_API_KEY)
-# Set the random seed for reproducibility
-torch.manual_seed(42)
 import os
-# Load the wikitext-103 dataset
+import torch
+import pandas as pd
+from tqdm import tqdm
 from datasets import load_dataset
-#find corpus_3k.txt
-if not os.path.exists(PATH_DATA+"corpus_300k.txt"):
-    print("corpus_300k.txt not found")
-    #dataset = load_dataset("wikitext", "wikitext-2-v1")
-    dataset = load_dataset("wikipedia", "20220301.en")
-    train_dataset = dataset["train"]['text']
-    print(f"Number of documents: {len(train_dataset)}")
-    #split the dataset to 100000, randomize
-    from tqdm import tqdm
-    #slice dataset as max tokens is 512
-    for i in tqdm(range(len(train_dataset))):
-        train_dataset[i] = train_dataset[i][:512]
+from langchain_community.vectorstores import FAISS
+from langchain.document_loaders import TextLoader, PyPDFLoader
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+import random
+import time
+import argparse  # For command-line options
 
+PATH = "/Users/deniskim/Library/CloudStorage/SynologyDrive-M1/문서/연구/DIAL/code/home/tako/minseok/db"
+PATH_DATA = "/Users/deniskim/Library/CloudStorage/SynologyDrive-M1/문서/연구/DIAL/code/home/tako/minseok/dataset/"
+GOOGLE_API_KEY_PATH = os.path.join(PATH_DATA, "google_api.txt")
+OPENAI_API_KEY_PATH = os.path.join(PATH_DATA, "openai_key.txt")
+
+def load_api_keys():
+    with open(GOOGLE_API_KEY_PATH, "r") as f:
+        google_api_key = f.read().strip()
+    with open(OPENAI_API_KEY_PATH, "r") as f:
+        openai_api_key = f.read().strip()
+    return google_api_key, openai_api_key
+
+def create_embeddings(api_key, model="text-embedding-3-small", source='openai'):
+    if source == 'google':
+        return GoogleGenerativeAIEmbeddings(model=model, google_api_key=api_key)
+    else:
+        return OpenAIEmbeddings(model=model, openai_api_key=api_key)
+
+def process_wikipedia_data():
+    dataset = load_dataset("wikipedia", "20220301.en")
+    train_dataset = dataset["train"]['text'][:300000] # Sample for simplicity
+    train_dataset = [doc.replace('\n', ' ').strip()[:512] for doc in train_dataset]
     random.shuffle(train_dataset)
-    #truncate the dataset to 100000
-    num_doc = 3000
-    train_dataset = train_dataset[:num_doc]
-    #truncate the dataset to max 512 tokens
-    train_dataset = [doc[:512] for doc in train_dataset]
-    #remove '\n' from the dataset
-    train_dataset = [doc.replace('\n', ' ') for doc in train_dataset]
-    end_time = time.time()
-    print(f"Preprocess - Time taken: {end_time-start_time:.2f}s")
-    #test_dataset = dataset["test"]
-    #val_dataset = dataset["validation"]
-    # Print the first few examples
-    #use bm25 to rank the documents, when given query
-    query = "Tell me about a components of a computer"
-    import time
-    start = time.time()
-    #dataset is stated above, find in the train_dataset
-    #define bm25
-    from rank_bm25 import BM25Okapi
-    import numpy as np
-    # Tokenize the documents
-    tokenized_corpus = [train_dataset[i].split(" ") for i in range(len(train_dataset))]
-    bm25 = BM25Okapi(tokenized_corpus)
-    # Get the top 5 documents
-    doc_scores = bm25.get_scores(query.split(" "))
-    top_5 = np.argsort(doc_scores)[::-1][:5]
-    end = time.time()
-    print(f"Time taken: {end-start:.2f}s")
-    
-    for i, doc in enumerate(top_5):
-        print(f"Rank {i+1}:", train_dataset[int(doc)])
-        
-    #save to text file
-    with open(PATH_DATA+'corpus_3k.txt', 'w') as f:
+    with open(os.path.join(PATH_DATA, "corpus_300k.txt"), 'w') as f:
         for doc in train_dataset:
             f.write("%s\n" % doc)
-    quit()
-#'''
+
+def process_nyt_data():
+    df = pd.read_csv(os.path.join(PATH_DATA, "nyt-metadata.csv"))
+    df = df.dropna(subset=['abstract'])
+    df = df[df['abstract'] != 'To the Editor:']
+    df = df.tail(int(len(df) * 0.1))  # Last 10%
+    with open(os.path.join(PATH_DATA, "nyt_10.txt"), 'w') as f:
+        for abstract in df['abstract']:
+            f.write("%s\n" % abstract[:512])
 
 
-
-#'''
-from langchain_community.vectorstores import FAISS
-if not os.path.exists(PATH + "/index.faiss"):
-    #define loader using langchain
-    loader = TextLoader(PATH_DATA+"corpus_300k.txt")
-    #load the document
+def process_pdf_data(pdf_path, embeddings, chunk_size, chunk_overlap, index_path):
+    loader = PyPDFLoader(pdf_path)
     document = loader.load()
-    #use google palm embeddings
-
-    #split the text
-    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+    print(f"Number of documents: {len(document)}")
+    splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     text_split = splitter.split_documents(document)
+    print(f"Number of chunks: {len(text_split)}")
+    convert_to_faiss(text_split, embeddings, index_path)
 
-    ch_time = time.time()
-    #vs_doc = Chroma.from_documents(documents = text_split, embedding = embeddings, persist_directory = PATH)
-    vs_doc = FAISS.from_documents(documents = text_split, embedding = embeddings)
-    vs_doc.save_local(PATH)
-    print(f"Time taken: {time.time()-ch_time:.2f}s")
-    #vs_doc.persist()
-    #print("Vectorstore is persisted")
-    #print("Time taken: ", time.time()-ch_time)
+def convert_to_faiss(text_split, embeddings, index_path):
+    vs_doc = None
+    for i, doc in enumerate(tqdm(text_split, desc="Processing documents")):
+        if i == 0:
+            vs_doc = FAISS.from_documents(documents=[doc], embedding=embeddings)
+        else:
+            try:
+                vs_doc_ingest = FAISS.from_documents(documents=[doc], embedding=embeddings)
+                vs_doc.merge_from(vs_doc_ingest)
+            except Exception as e:
+                print(e)
+                time.sleep(0.06)
+    vs_doc.save_local(index_path)
 
-    #quit()
-
-#Intended to be testing#
-import google.generativeai as palm
-palm.configure(api_key=GOOGLE_API_KEY)
-
-models = [model for model in palm.list_models()]
-
-for model in models:
-  print(model.name)
-
-
-from langchain.memory import ConversationBufferMemory, VectorStoreRetrieverMemory
-
-#memory = ConversationBufferMemory(memory_key="chat_history")#, return_docs = False)
-#memory.chat_memory.add_user_message("Hello")
-epoch = 5
-#load the vectorstore
-for cnt in range(1, epoch+1):
-    vs_doc = FAISS.load_local(PATH, embeddings, allow_dangerous_deserialization = True)
-    retriever = vs_doc.as_retriever(search_kwargs=dict(k=1))
-    memory = VectorStoreRetrieverMemory(retriever=retriever, memory_key="chat_history")
-    template2 = """You are a nice chatbot having a conversation with a human.
-    Previous conversation:
-    {chat_history}
-    New human question: {question} . Please answer this question, answer as simple as possible. Answer precisely.
-    Response:"""
-    prompt2 = PromptTemplate.from_template(template2)
-    print(f"Epoch {cnt}")
-    query = input("Enter your query: ")
-    query = query.strip()
+def main(dataset, pdf_path):
+    print("Processing data...")
+    print(f"Dataset: {dataset}")
+    print(f"PDF path: {pdf_path}")
+    torch.manual_seed(42)
+    google_api_key, openai_api_key = load_api_keys()
     
-    tim1 = time.time()
-    print(f"Time taken: {time.time()-tim1:.2f}s")
-    
-    llm = ChatGooglePalm(google_api_key=GOOGLE_API_KEY)
-    chat_history_tuples = []
-    for message in memory:
-        chat_history_tuples.append((message[0], message[1]))
-    # Define the chain
-    conversation = LLMChain(
-        llm=llm,
-        prompt=prompt2,
-        verbose=True,
-        memory=memory
-    )
-    try:
-        output = conversation.invoke(query)
-    except Exception as e:
-        #print(e)
-        output = "Okay, got your idea. Go ahead."
-    print(output['text'])
-    
+    if dataset == 'wikipedia':
+        if os.path.exists(os.path.join(PATH, "wikipedia/index.faiss")):
+            print("Wikipedia data has already been processed.")
+            return
+        process_wikipedia_data()
+        # Assuming Google embeddings are used for Wikipedia
+        embeddings = create_embeddings(google_api_key, source='google')
+        convert_to_faiss(os.path.join(PATH_DATA, "corpus_3k.txt"), embeddings, 1000, 0, os.path.join(PATH, "wikipedia"))
+        
+    elif dataset == 'nyt':
+        if os.path.exists(os.path.join(PATH, "nyt/index.faiss")):
+            print("NYT data has already been processed.")
+            return
+        process_nyt_data()
+        # Assuming OpenAI embeddings are used for NYT
+        embeddings = create_embeddings(openai_api_key)
+        convert_to_faiss(os.path.join(PATH_DATA, "nyt_10.txt"), embeddings, 250, 0, os.path.join(PATH, "nyt"))
+        
+    elif dataset == 'pdf':
+        name = pdf_path.split('/')[-1]
+        if not os.path.exists(pdf_path):
+            print("File does not exist.")
+            return
+        if os.path.exists(os.path.join(PATH, name.split('.')[0] + "/index.faiss")):
+            print("PDF data has already been processed.")
+            return
+        embeddings = create_embeddings(openai_api_key)
+        name = name.split('.')[0]
+        process_pdf_data(pdf_path, embeddings, 1000, 0, os.path.join(PATH, name))
+'''
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Process data to create FAISS embeddings.")
+    parser.add_argument("--dataset", type=str, choices=['wikipedia', 'nyt', 'pdf'], help="The dataset to process.")
+    args = parser.parse_args()
+
+    main(args.dataset)
+'''
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Process data to create FAISS embeddings.")
+    parser.add_argument("--dataset", type=str, choices=['wikipedia', 'nyt', 'pdf'], help="The dataset to process.")
+    parser.add_argument("--filepath", type=str, help="Path to the PDF file to process.", default="")
+    args = parser.parse_args()
+
+    main(args.dataset, args.filepath)  # Ensure your main function can handle this argument

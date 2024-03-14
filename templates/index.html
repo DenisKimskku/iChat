@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dataset Processing</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+    <h1>Process Datasets</h1>
+    <form action="/process" method="post" enctype="multipart/form-data">
+        <label for="dataset-select">Select a dataset to process:</label>
+        <select name="dataset" id="dataset-select">
+            <option value="wikipedia">Wikipedia</option>
+            <option value="nyt">New York Times</option>
+            <option value="pdf">PDF</option>
+        </select>
+        <div id="pdf-upload" class="hidden">
+            <p>Upload a PDF or select from existing:</p>
+            <input type="file" name="file" id="pdf-file" accept=".pdf">
+            <select name="existing_pdf" id="pdf-select">
+                <option value="">Select existing PDF</option>
+                {% for pdf_file in pdf_files %}
+                <option value="{{ pdf_file }}">{{ pdf_file }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit">Process</button>
+    </form>
+</div>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
