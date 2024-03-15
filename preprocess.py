@@ -45,6 +45,8 @@ def process_nyt_data():
         #do this command: kaggle datasets download -d aryansingh0909/nyt-articles-21m-2000-present
         os.system("kaggle datasets download -d aryansingh0909/nyt-articles-21m-2000-present")
         os.system("unzip nyt-articles-21m-2000-present.zip")
+        os.system("rm nyt-articles-21m-2000-present.zip")
+        os.system("mv nyt-metadata.csv "+PATH_DATA)
     df = pd.read_csv(os.path.join(PATH_DATA, "nyt-metadata.csv"))
     df = df.dropna(subset=['abstract'])
     df = df[df['abstract'] != 'To the Editor:']
@@ -91,7 +93,7 @@ def main(dataset, pdf_path):
         process_wikipedia_data()
         # Assuming Google embeddings are used for Wikipedia
         embeddings = create_embeddings(google_api_key, source='google')
-        convert_to_faiss(os.path.join(PATH_DATA, "corpus_3k.txt"), embeddings, 1000, 0, os.path.join(PATH, "wikipedia"))
+        convert_to_faiss(os.path.join(PATH_DATA, "corpus_300k.txt"), embeddings, 1000, 0, os.path.join(PATH, "wikipedia"))
         
     elif dataset == 'nyt':
         if os.path.exists(os.path.join(PATH, "nyt/index.faiss")):
@@ -113,14 +115,7 @@ def main(dataset, pdf_path):
         embeddings = create_embeddings(openai_api_key)
         name = name.split('.')[0]
         process_pdf_data(pdf_path, embeddings, 1000, 0, os.path.join(PATH, name))
-'''
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Process data to create FAISS embeddings.")
-    parser.add_argument("--dataset", type=str, choices=['wikipedia', 'nyt', 'pdf'], help="The dataset to process.")
-    args = parser.parse_args()
 
-    main(args.dataset)
-'''
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process data to create FAISS embeddings.")
     parser.add_argument("--dataset", type=str, choices=['wikipedia', 'nyt', 'pdf'], help="The dataset to process.")
