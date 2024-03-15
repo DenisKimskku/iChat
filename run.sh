@@ -1,2 +1,2 @@
-python preprocess.py
-python interface_alpha.py
+pip install -r requirements.txt
+flask run

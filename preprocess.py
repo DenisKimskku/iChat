@@ -76,7 +76,7 @@ def main(dataset, pdf_path):
     print("Processing data...")
     print(f"Dataset: {dataset}")
     print(f"PDF path: {pdf_path}")
-    torch.manual_seed(42)
+    random.seed(42)
     google_api_key, openai_api_key = load_api_keys()
     
     if dataset == 'wikipedia':

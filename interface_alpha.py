@@ -2,13 +2,14 @@ from langchain.chat_models import ChatGooglePalm
 from langchain.memory import ConversationBufferMemory, VectorStoreRetrieverMemory
 from langchain.llms.openai import OpenAI
 from langchain_openai import OpenAIEmbeddings
+from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 from langchain_community.vectorstores import FAISS
 import gradio as gr
 import os
 from langchain import LLMChain
 from langchain.prompts import PromptTemplate
 # Configuration and Initialization
-PATH = "/Users/deniskim/Library/CloudStorage/SynologyDrive-M1/문서/연구/DIAL/code/home/tako/minseok/db/recommender"
+PATH = "/Users/deniskim/Library/CloudStorage/SynologyDrive-M1/문서/연구/DIAL/code/home/tako/minseok/db/"
 PATH_DATA = "/Users/deniskim/Library/CloudStorage/SynologyDrive-M1/문서/연구/DIAL/code/home/tako/minseok/dataset/"
 GOOGLE_API_KEY_PATH = os.path.join(PATH_DATA, "google_api.txt")
 OPENAI_API_KEY_PATH = os.path.join(PATH_DATA, "openai_key.txt")
@@ -20,11 +21,17 @@ def load_api_keys():
         openai_api_key = f.read().strip()
     return google_api_key, openai_api_key
 
-def setup_gradio_interface():
+def setup_gradio_interface(name):
     GOOGLE_API_KEY, OPENAI_API_KEY = load_api_keys()
     llm = ChatGooglePalm(google_api_key=GOOGLE_API_KEY)
-    embeddings = OpenAIEmbeddings(model="text-embedding-3-small", openai_api_key=OPENAI_API_KEY)
-    vs_doc = FAISS.load_local(PATH, embeddings, allow_dangerous_deserialization=True)
+    print(name)
+    path_data = os.path.join(PATH, name)
+    if name == "wikipedia":
+        embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", google_api_key=GOOGLE_API_KEY)
+    else:
+        embeddings = OpenAIEmbeddings(model="text-embedding-3-small", openai_api_key=OPENAI_API_KEY)
+    #embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", google_api_key=GOOGLE_API_KEY)
+    vs_doc = FAISS.load_local(path_data, embeddings, allow_dangerous_deserialization=True)
     retriever = vs_doc.as_retriever(search_type="mmr", search_kwargs=dict(k=3))
     
     # Initialize memories
@@ -64,10 +71,10 @@ def setup_gradio_interface():
         fn=response,
         textbox=gr.Textbox(placeholder="Talk to me..", container=False, scale=7),
         chatbot=gr.Chatbot(height=1000),
-        title="What chatbot do you want?",
-        description="Ask and I shall respond.",
+        title="iChat",
+        description="Loaded dataset: {}".format(name),
         theme="Monochrome", # "soft"
-        examples=[["It's hot today :( "], ["Lunch menu suggestions, choose between noodles or rice"], ["Tell me about A15 bionic chipset."]],
+        examples=[["Hi, how are you today?"], ["Can you tell me about Ukraine war in 2022?"], ["Tell me about A13 bionic chipset."]],
         retry_btn="Retry ↩",
         undo_btn="Delete Last Chat ❌",
         clear_btn="Clear All Chats 💫",
