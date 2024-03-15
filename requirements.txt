@@ -3,3 +3,4 @@ pandas==2.2.1
 tqdm==4.66.2
 datasets==2.18.0
 gradio==4.21.0
+kaggle

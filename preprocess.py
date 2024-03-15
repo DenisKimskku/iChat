@@ -29,7 +29,7 @@ def create_embeddings(api_key, model="text-embedding-3-small", source='openai'):
         return GoogleGenerativeAIEmbeddings(model=model, google_api_key=api_key)
     else:
         return OpenAIEmbeddings(model=model, openai_api_key=api_key)
-
+    
 def process_wikipedia_data():
     dataset = load_dataset("wikipedia", "20220301.en")
     train_dataset = dataset["train"]['text'][:300000] # Sample for simplicity
@@ -40,6 +40,11 @@ def process_wikipedia_data():
             f.write("%s\n" % doc)
 
 def process_nyt_data():
+    if not os.path.exists(os.path.join(PATH_DATA, "nyt-metadata.csv")):
+        print("NYT metadata file not found.")
+        #do this command: kaggle datasets download -d aryansingh0909/nyt-articles-21m-2000-present
+        os.system("kaggle datasets download -d aryansingh0909/nyt-articles-21m-2000-present")
+        os.system("unzip nyt-articles-21m-2000-present.zip")
     df = pd.read_csv(os.path.join(PATH_DATA, "nyt-metadata.csv"))
     df = df.dropna(subset=['abstract'])
     df = df[df['abstract'] != 'To the Editor:']
