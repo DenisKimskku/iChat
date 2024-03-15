@@ -67,13 +67,25 @@ def setup_gradio_interface(name):
 
         return response_text
 
+    js_func = """
+    function refresh() {
+        const url = new URL(window.location);
+
+        if (url.searchParams.get('__theme') !== 'dark') {
+            url.searchParams.set('__theme', 'dark');
+            window.location.href = url.href;
+        }
+    }
+    """
+
     iface = gr.ChatInterface(
+        js = js_func,
         fn=response,
         textbox=gr.Textbox(placeholder="Talk to me..", container=False, scale=7),
         chatbot=gr.Chatbot(height=1000),
         title="iChat",
         description="Loaded dataset: {}".format(name),
-        theme="Monochrome", # "soft"
+        theme="Franklisi/darkmode",#"Monochrome", "soft"
         examples=[["Hi, how are you today?"], ["Can you tell me about Ukraine war in 2022?"], ["Tell me about A13 bionic chipset."]],
         retry_btn="Retry ↩",
         undo_btn="Delete Last Chat ❌",

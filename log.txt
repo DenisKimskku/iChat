@@ -98,3 +98,5 @@ Index page accessed, listed PDF files.
 Existing PDF selected for processing: /Users/deniskim/Library/CloudStorage/SynologyDrive-M1/문서/연구/DIAL/code/home/tako/minseok/dataset/recommender.pdf
 Index page accessed, listed PDF files.
 Processing dataset: nyt
+Index page accessed, listed PDF files.
+Index page accessed, listed PDF files.
