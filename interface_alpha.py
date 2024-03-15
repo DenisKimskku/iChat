@@ -30,7 +30,7 @@ def setup_gradio_interface(name):
         embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", google_api_key=GOOGLE_API_KEY)
     else:
         embeddings = OpenAIEmbeddings(model="text-embedding-3-small", openai_api_key=OPENAI_API_KEY)
-    #embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", google_api_key=GOOGLE_API_KEY)
+
     vs_doc = FAISS.load_local(path_data, embeddings, allow_dangerous_deserialization=True)
     retriever = vs_doc.as_retriever(search_type="mmr", search_kwargs=dict(k=3))
     

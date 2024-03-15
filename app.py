@@ -7,6 +7,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 import threading
 import interface_alpha
+import asyncio
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "/Users/deniskim/Library/CloudStorage/SynologyDrive-M1/문서/연구/DIAL/code/home/tako/minseok/dataset/"
@@ -68,7 +69,7 @@ def process_dataset():
 @app.route('/skip_preprocessing')
 def skip_preprocessing():
     return redirect(url_for('chat_interface'))
-import asyncio
+
 @app.route('/chat_interface')
 def chat_interface():
     global gradio_interface_launched
