@@ -9,8 +9,8 @@ import os
 from langchain import LLMChain
 from langchain.prompts import PromptTemplate
 # Configuration and Initialization
-PATH = "/Users/deniskim/Library/CloudStorage/SynologyDrive-M1/문서/연구/DIAL/code/home/tako/minseok/db/"
-PATH_DATA = "/Users/deniskim/Library/CloudStorage/SynologyDrive-M1/문서/연구/DIAL/code/home/tako/minseok/dataset/"
+PATH = "/root/db/"
+PATH_DATA = "/root/dataset/"
 GOOGLE_API_KEY_PATH = os.path.join(PATH_DATA, "google_api.txt")
 OPENAI_API_KEY_PATH = os.path.join(PATH_DATA, "openai_key.txt")
 

@@ -10,7 +10,7 @@ import interface_alpha
 import asyncio
 
 app = Flask(__name__)
-UPLOAD_FOLDER = "/Users/deniskim/Library/CloudStorage/SynologyDrive-M1/문서/연구/DIAL/code/home/tako/minseok/dataset/"
+UPLOAD_FOLDER = "/root/dataset/"
 
 ALLOWED_EXTENSIONS = {'pdf'}
 
@@ -45,7 +45,7 @@ def process_dataset():
             filename = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
             file.save(filename)
             logger.info(f'PDF file uploaded and saved: {filename}')
-            subprocess.run(['python', 'preprocess.py', '--dataset', 'pdf', '--filepath', filename])
+            subprocess.run([sys.executable, 'preprocess.py', '--dataset', 'pdf', '--filepath', filename])
             session['pdf_file'] = file.filename.split(".")[0]
         else:
             existing_pdf = request.form.get('existing_pdf')
@@ -53,7 +53,7 @@ def process_dataset():
                 filepath = os.path.join(app.config['UPLOAD_FOLDER'], existing_pdf)
                 if os.path.exists(filepath):
                     logger.info(f'Existing PDF selected for processing: {filepath}')
-                    subprocess.run(['python', 'preprocess.py', '--dataset', 'pdf', '--filepath', filepath])
+                    subprocess.run([sys.executable, 'preprocess.py', '--dataset', 'pdf', '--filepath', filepath])
                     session['pdf_file'] = existing_pdf.split(".")[0]
                 else:
                     logger.warning(f'Attempted to process non-existent PDF: {filepath}')
@@ -63,7 +63,7 @@ def process_dataset():
         logger.info(f'Processing dataset: {dataset}')
         session['pdf_file'] = dataset
         
-        subprocess.run(['python', 'preprocess.py', '--dataset', dataset])
+        subprocess.run([sys.executable, 'preprocess.py', '--dataset', dataset])
     return redirect(url_for('chat_interface'))
 
 @app.route('/skip_preprocessing')
@@ -84,11 +84,11 @@ def chat_interface():
 def launch_gradio_interface(name):
     async def async_launch():
         iface = interface_alpha.setup_gradio_interface(name)
-        await iface.launch(server_name="0.0.0.0", server_port=7860)
+        await iface.launch(server_name="24.144.88.207", server_port=7860)
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(async_launch())
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
