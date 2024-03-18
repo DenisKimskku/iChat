@@ -3,20 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <title>Dataset Processing</title>
-    <!--<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">-->
+    <!-- Using Pico CSS for simplicity and aesthetics -->
     <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
 </head>
 <body>
 <div class="container">
     <h1>Process Datasets</h1>
-    <form action="/process" method="post" enctype="multipart/form-data" id="process-form">
-        <label for="dataset-select">Select a dataset to process:</label>
-        <select name="dataset" id="dataset-select">
-            <option value="wikipedia">Wikipedia</option>
-            <option value="nyt">New York Times</option>
-            <option value="pdf">PDF</option>
-        </select>
-        <div id="pdf-upload" class="hidden">
+    <!-- Dataset processing form -->
+    <form action="/process" method="post" enctype="multipart/form-data">
+        <div>
+            <label for="dataset-select">Select a dataset to process:</label>
+            <select name="dataset" id="dataset-select" onchange="handleDatasetChange()">
+                <option value="wikipedia">Wikipedia</option>
+                <option value="nyt">New York Times</option>
+                <option value="pdf">PDF</option>
+            </select>
+        </div>
+        <div id="pdf-upload" style="display:none;">
             <p>Upload a PDF or select from existing:</p>
             <input type="file" name="file" id="pdf-file" accept=".pdf">
             <select name="existing_pdf" id="pdf-select">
@@ -28,10 +31,27 @@
         </div>
         <button type="submit">Process</button>
     </form>
-    <form action="/skip_preprocessing" method="get">
+    <!-- Logout button -->
+    <form action="/logout" method="post" style="margin-top: 20px;">
+        <button type="submit">Logout</button>
+    </form>
+    <!-- Skip Preprocessing -->
+    <form action="/skip_preprocessing" method="get" style="margin-top: 10px;">
         <button type="submit">Skip Preprocessing</button>
     </form>
 </div>
+<!-- Including script for handling dynamic show/hide of the PDF upload section -->
 <script src="{{ url_for('static', filename='script.js') }}"></script>
+<script>
+    function handleDatasetChange() {
+        const selectedValue = document.getElementById('dataset-select').value;
+        const pdfUploadSection = document.getElementById('pdf-upload');
+        if (selectedValue === 'pdf') {
+            pdfUploadSection.style.display = 'block';
+        } else {
+            pdfUploadSection.style.display = 'none';
+        }
+    }
+</script>
 </body>
 </html>

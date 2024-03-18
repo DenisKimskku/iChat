@@ -79,11 +79,12 @@ def setup_gradio_interface(name):
     """
 
     iface = gr.ChatInterface(
-        js = js_func,
+        #js = js_func,
         fn=response,
         textbox=gr.Textbox(placeholder="Talk to me..", container=False, scale=7),
         chatbot=gr.Chatbot(height=1000),
         title="iChat",
+        #css = "https://unpkg.com/@picocss/pico@latest/css/pico.min.css",
         description="Loaded dataset: {}".format(name),
         theme="Franklisi/darkmode",#"Monochrome", "soft"
         examples=[["Hi, how are you today?"], ["Can you tell me about Ukraine war in 2022?"], ["Tell me about A13 bionic chipset."]],
