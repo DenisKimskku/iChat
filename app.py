@@ -165,11 +165,12 @@ def chat_interface():
     # Now we ensure the thread starts with the current file name to launch
     #gradio_thread = threading.Thread(target=launch_gradio_interface, args=(file_name_to_launch,), daemon=True)
     for p in multiprocessing.active_children():
-        if p.name == "gradio_t":
+        if p.name == str(username):
             p.terminate()
     logger.info("Inside if loop")
     gradio_interface_launched = True
-    gradio_thread = multiprocessing.Process(target=launch_gradio_interface, args=(file_name_to_launch,), name='gradio_t')
+    #gradio_thread = multiprocessing.Process(target=launch_gradio_interface, args=(file_name_to_launch,), name='gradio_t')
+    gradio_thread = multiprocessing.Process(target=launch_gradio_interface, args=(file_name_to_launch,), name=str(username))
     gradio_thread.start()
         #gradio_interface_launched = True
     
