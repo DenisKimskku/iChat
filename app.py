@@ -136,6 +136,11 @@ def process_dataset():
 
 @app.route('/skip_preprocessing')
 def skip_preprocessing():
+    username = session['username']
+    if 'pdf_file' not in session:
+        update_user_session(username, 'wikipedia')
+    else:
+        update_user_session(username, session['pdf_file'])
     return redirect(url_for('chat_interface'))
 global gradio_thread
 @app.route('/chat_interface')

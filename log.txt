@@ -122,3 +122,54 @@ Connected!
 In chat interface!
 sep_process
 Inside if loop
+Connected!
+Connected!
+In chat interface!
+None
+Inside if loop
+Connected!
+Connected!
+admin, None
+Connected!
+Connected!
+Connected!
+In user session!
+admin, wikipedia
+Connected!
+In chat interface!
+wikipedia
+Inside if loop
+Connected!
+Processing dataset: nyt
+Connected!
+Connected!
+In user session!
+admin, nyt
+Connected!
+In chat interface!
+nyt
+Inside if loop
+Connected!
+Connected!
+Connected!
+In user session!
+admin, wikipedia
+Connected!
+In chat interface!
+wikipedia
+Inside if loop
+Connected!
+Connected!
+Connected!
+In user session!
+admin, None
+Connected!
+Existing PDF selected for processing: /root/dataset/recommender.pdf
+Connected!
+Connected!
+In user session!
+admin, recommender
+Connected!
+In chat interface!
+recommender
+Inside if loop
