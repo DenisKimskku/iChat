@@ -100,3 +100,7 @@ Index page accessed, listed PDF files.
 Processing dataset: nyt
 Index page accessed, listed PDF files.
 Index page accessed, listed PDF files.
+Index page accessed, listed PDF files.
+PDF file uploaded and saved: /Users/deniskim/Library/CloudStorage/SynologyDrive-M1/문서/연구/DIAL/code/home/tako/minseok/dataset/sep_process.pdf
+Index page accessed, listed PDF files.
+PDF file uploaded and saved: /Users/deniskim/Library/CloudStorage/SynologyDrive-M1/문서/연구/DIAL/code/home/tako/minseok/dataset/sep_process.pdf

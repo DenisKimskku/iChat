@@ -3,7 +3,7 @@ Flask==2.2.2
 pandas==2.2.1
 tqdm==4.66.2
 datasets==2.18.0
-gradio==4.21.0
+gradio==3.50.2
 kaggle
 langchain
 langchain-openai
