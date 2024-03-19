@@ -52,3 +52,73 @@ Connected!
 In chat interface!
 nyt
 Inside if loop
+Connected!
+Connected!
+In user session!
+admin, None
+Connected!
+Existing PDF selected for processing: /root/dataset/sep_process.pdf
+Connected!
+Connected!
+In user session!
+admin, sep_process
+Connected!
+In chat interface!
+sep_process
+Inside if loop
+Connected!
+Connected!
+In user session!
+admin, None
+Connected!
+Existing PDF selected for processing: /root/dataset/sep_process.pdf
+Connected!
+Connected!
+In user session!
+admin, sep_process
+Connected!
+In chat interface!
+sep_process
+Inside if loop
+Connected!
+Connected!
+In user session!
+admin, None
+Connected!
+Existing PDF selected for processing: /root/dataset/sep_process.pdf
+Connected!
+Connected!
+In user session!
+admin, sep_process
+Connected!
+In chat interface!
+sep_process
+Inside if loop
+Connected!
+Connected!
+In user session!
+admin, None
+Connected!
+Existing PDF selected for processing: /root/dataset/sep_process.pdf
+Connected!
+Connected!
+In user session!
+admin, sep_process
+Connected!
+In chat interface!
+sep_process
+Inside if loop
+Connected!
+Connected!
+In user session!
+admin, None
+Connected!
+Existing PDF selected for processing: /root/dataset/sep_process.pdf
+Connected!
+Connected!
+In user session!
+admin, sep_process
+Connected!
+In chat interface!
+sep_process
+Inside if loop

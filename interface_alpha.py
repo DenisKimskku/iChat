@@ -82,7 +82,7 @@ def setup_gradio_interface(name):
         #js = js_func,
         fn=response,
         textbox=gr.Textbox(placeholder="Talk to me..", container=False, scale=7),
-        chatbot=gr.Chatbot(height=1000),
+        chatbot=gr.Chatbot(height=1000, latex_delimiters=[{ "left": "$$", "right": "$$", "display": True },{ "left": "$", "right": "$", "display": False }, {"left": "\\(", "right": "\\)", "display": False},{"left": "\\[", "right": "\\]", "display": False}]),
         title="iChat",
         #css = "https://unpkg.com/@picocss/pico@latest/css/pico.min.css",
         description="Loaded dataset: {}".format(name),
